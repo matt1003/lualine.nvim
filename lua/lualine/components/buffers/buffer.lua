@@ -29,8 +29,8 @@ function Buffer:get_props()
   self.file = modules.utils.stl_escape(vim.api.nvim_buf_get_name(self.bufnr))
   self.buftype = vim.api.nvim_buf_get_option(self.bufnr, 'buftype')
   self.filetype = vim.api.nvim_buf_get_option(self.bufnr, 'filetype')
-  local modified = self.options.show_modified_status and vim.api.nvim_buf_get_option(self.bufnr, 'modified')
-  self.modified_icon = modified and self.options.symbols.modified or ''
+  self.modified = self.options.show_modified_status and vim.api.nvim_buf_get_option(self.bufnr, 'modified')
+  self.modified_icon = self.modified and self.options.symbols.modified or ''
   self.alternate_file_icon = self:is_alternate() and self.options.symbols.alternate_file or ''
   self.icon = ''
   if self.options.icons_enabled then
@@ -83,8 +83,10 @@ function Buffer:render()
   -- setup for mouse clicks
   local line = self:configure_mouse_click(name)
   -- apply highlight
-  line = modules.highlight.component_format_highlight(self.highlights[(self.current and 'active' or 'inactive')])
+  local status = (self.current and 'active' or 'inactive') .. (self.modified and '_modified' or '')
+  line = modules.highlight.component_format_highlight(self.highlights[status])
     .. line
+    .. modules.highlight.component_format_highlight(self.highlights[status:gsub('_modified$', '')])
 
   -- apply separators
   if self.options.self.section < 'x' and not self.first then

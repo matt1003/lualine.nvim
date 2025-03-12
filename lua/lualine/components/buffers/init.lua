@@ -59,12 +59,16 @@ function M:init(options)
   default_options.buffers_color = {
     active = default_active,
     inactive = get_hl('lualine_' .. options.self.section, false),
+    active_modified = { fg = '#fe8019', bg = '#504945' },
+    inactive_modified = { fg = '#fe8019', bg = '#3c3836' },
   }
   self.options = vim.tbl_deep_extend('keep', self.options or {}, default_options)
   if self.options.component_name == 'buffers' then
     self.highlights = {
       active = self:create_hl(self.options.buffers_color.active, 'active'),
       inactive = self:create_hl(self.options.buffers_color.inactive, 'inactive'),
+      active_modified = self:create_hl(self.options.buffers_color.active_modified, 'active_modified'),
+      inactive_modified = self:create_hl(self.options.buffers_color.inactive_modified, 'inactive_modified'),
     }
   end
 end
