@@ -128,7 +128,7 @@ function M:update_status()
   end
 
   if max_length == 0 then
-    max_length = math.floor(2 * vim.o.columns / 3)
+    max_length = vim.o.columns - 15
   end
   local total_length
   for i, buffer in pairs(buffers) do
