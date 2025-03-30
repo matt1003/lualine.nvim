@@ -29,8 +29,8 @@ function Buffer:get_props()
   self.file = modules.utils.stl_escape(vim.api.nvim_buf_get_name(self.bufnr))
   self.buftype = vim.api.nvim_buf_get_option(self.bufnr, 'buftype')
   self.filetype = vim.api.nvim_buf_get_option(self.bufnr, 'filetype')
-  local modified = self.options.show_modified_status and vim.api.nvim_buf_get_option(self.bufnr, 'modified')
-  self.modified_icon = modified and self.options.symbols.modified or ''
+  self.modified = self.options.show_modified_status and vim.api.nvim_buf_get_option(self.bufnr, 'modified')
+  self.modified_icon = self.modified and self.options.symbols.modified or ''
   self.alternate_file_icon = self:is_alternate() and self.options.symbols.alternate_file or ''
   self.icon = ''
   if self.options.icons_enabled then
@@ -83,40 +83,36 @@ function Buffer:render()
   -- setup for mouse clicks
   local line = self:configure_mouse_click(name)
   -- apply highlight
-  line = modules.highlight.component_format_highlight(self.highlights[(self.current and 'active' or 'inactive')])
+  local status = (self.current and 'active' or 'inactive') .. (self.modified and '_modified' or '')
+  line = modules.highlight.component_format_highlight(self.highlights[status])
     .. line
+    .. modules.highlight.component_format_highlight(self.highlights[status:gsub('_modified$', '')])
 
   -- apply separators
-  if self.options.self.section < 'x' and not self.first then
-    local sep_before = self:separator_before()
-    line = sep_before .. line
-    self.len = self.len + vim.fn.strchars(sep_before)
-  elseif self.options.self.section >= 'x' and not self.last then
-    local sep_after = self:separator_after()
-    line = line .. sep_after
-    self.len = self.len + vim.fn.strchars(sep_after)
+  if self.options.self.section < 'x' then
+    local separator = self.options.section_separators.left
+    line = self:separator_before(separator) .. line .. self:separator_after(separator)
+    self.len = self.len + (vim.fn.strchars(separator) * 2)
+  else
+    local separator = self.options.section_separators.right
+    line = self:separator_after(separator) .. line .. self:separator_before(separator)
+    self.len = self.len + (vim.fn.strchars(separator) * 2)
   end
   return line
 end
 
 ---apply separator before current buffer
 ---@return string
-function Buffer:separator_before()
-  if self.current or self.aftercurrent then
-    return '%Z{' .. self.options.section_separators.left .. '}'
-  else
-    return self.options.component_separators.left
-  end
+function Buffer:separator_before(separator)
+  local status = (self.current and 'active' or 'inactive') .. (self.modified and '_modified' or '') .. '_separator'
+  return modules.highlight.component_format_highlight(self.highlights[status]) .. separator
 end
 
 ---apply separator after current buffer
 ---@return string
-function Buffer:separator_after()
-  if self.current or self.beforecurrent then
-    return '%z{' .. self.options.section_separators.right .. '}'
-  else
-    return self.options.component_separators.right
-  end
+function Buffer:separator_after(separator)
+  local status = (self.current and 'active' or 'inactive') .. (self.modified and '_modified' or '') .. '_separator_inv'
+  return modules.highlight.component_format_highlight(self.highlights[status]) .. separator
 end
 
 ---returns name of current buffer after filtering special buffers

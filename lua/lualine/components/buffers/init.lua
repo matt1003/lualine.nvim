@@ -21,7 +21,13 @@ local default_options = {
   use_mode_colors = false,
   buffers_color = {
     active = nil,
+    active_modified = {},
+    active_separator = {},
+    active_modified_separator = {},
     inactive = nil,
+    inactive_modified = {},
+    inactive_separator = {},
+    inactive_modified_separator = {},
   },
   symbols = {
     modified = ' ●',
@@ -48,6 +54,10 @@ local function get_hl(section, is_active)
   return section .. suffix
 end
 
+local function inv(hl)
+  return { fg = hl.bg, bg = hl.fg, gui = hl.gui }
+end
+
 function M:init(options)
   M.super.init(self, options)
   -- if use_mode_colors is set, use a function so that the colors update
@@ -62,9 +72,28 @@ function M:init(options)
   }
   self.options = vim.tbl_deep_extend('keep', self.options or {}, default_options)
   if self.options.component_name == 'buffers' then
+    local colors = self.options.buffers_color
     self.highlights = {
-      active = self:create_hl(self.options.buffers_color.active, 'active'),
-      inactive = self:create_hl(self.options.buffers_color.inactive, 'inactive'),
+      -- active buffer highlights
+      active = self:create_hl(colors.active, 'active'),
+      active_modified = self:create_hl(colors.active_modified, 'active_modified'),
+      active_separator = self:create_hl(colors.active_separator, 'active_separator'),
+      active_separator_inv = self:create_hl(inv(colors.active_separator), 'active_separator_inv'),
+      active_modified_separator = self:create_hl(colors.active_modified_separator, 'active_modified_separator'),
+      active_modified_separator_inv = self:create_hl(
+        inv(colors.active_modified_separator),
+        'active_modified_separator_inv'
+      ),
+      -- inactive buffer highlights
+      inactive = self:create_hl(colors.inactive, 'inactive'),
+      inactive_modified = self:create_hl(colors.inactive_modified, 'inactive_modified'),
+      inactive_separator = self:create_hl(colors.inactive_separator, 'inactive_separator'),
+      inactive_separator_inv = self:create_hl(inv(colors.inactive_separator), 'inactive_separator_inv'),
+      inactive_modified_separator = self:create_hl(colors.inactive_modified_separator, 'inactive_modified_separator'),
+      inactive_modified_separator_inv = self:create_hl(
+        inv(colors.inactive_modified_separator),
+        'inactive_modified_separator_inv'
+      ),
     }
   end
 end
