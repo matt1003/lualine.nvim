@@ -128,7 +128,7 @@ function M.highlight(name, foreground, background, gui, link)
   else
     local foreground_rgb = sanitize_color(foreground)
     local background_rgb = sanitize_color(background)
-    gui = (gui ~= nil and gui ~= '') and gui or 'None'
+    gui = (gui ~= nil and gui ~= '') and gui .. ',nocombine' or 'nocombine'
     if
       loaded_highlights[name]
       and loaded_highlights[name].fg == foreground_rgb
@@ -489,17 +489,6 @@ function M.get_stl_default_hl(focused)
   else
     return 'StatusLine'
   end
-end
-
---- set the hl_name group to Normal
---- used to avoid conflict with hl groups like StatusLine, StatusLineNc...
---- @param hl_name string
-function M.set_hl_to_normal(hl_name)
-  local normal_color = modules.utils.extract_highlight_colors('Normal', nil)
-  if normal_color.reverse then -- swap
-    normal_color.fg, normal_color.bg = normal_color.bg, normal_color.fg
-  end
-  M.highlight(hl_name, normal_color.fg, normal_color.bg, 'None', nil)
 end
 
 return M
